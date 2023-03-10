@@ -1,0 +1,35 @@
+To get no of rows and columns in pandas 
+   no_rows,no_cols = df.shape
+To get column names and data types in Pandas
+   column_names,datatypes=df.columns.tolist() , df.dtypes.tolist()
+Connecting to Teradata and creating volatile tables
+ import teradatasql
+ TD_CONN =
+ TDConnString=f"""\
+    {{"host":"<host>"}",\
+    "user":"<user>",\
+    "password":"<psw>"
+    }\
+    """
+    
+ td_dtypes=["bigint"]
+ try:
+    with teradatasql.connect(TDConnString) as conn:
+        with conn.cursor() as c:
+            columnstring = ", ".join([" ".join(x) for x in zip(colnames,td_dtypes)])
+            c.execute(f"CREATE VOLATILE TABLE tbl_nm ({columnstring}) ON COMMIT PRESERVE ROWS;")
+            
+            insert_query = (
+            f"INSERT INTO tbl_nm values (?);"
+            )
+            
+            #create df chunks
+            no_chunks=np.ceil(n0_row * now_cols * 8 /1_000_000 * 1.25)
+            chunkDF= np.array_split(df,no_chunks)
+            
+            
+            for i,_ in enumerate(chunksDF):
+                data = chunksDF[i].values.tolist()
+                c.executemany(insert_query,data)
+                
+                
